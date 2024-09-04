@@ -1,0 +1,47 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// los modelos de la base de datos 
+model Category {
+  id  Int @id @default(autoincrement())
+  name String
+  slug  String
+  products Product[] //aqui relacionamos el modelo category con products
+}
+
+model Product {
+  id  Int @id @default(autoincrement())
+  name String
+  price Float
+  image String
+  categoryId Int 
+  category Category @relation(fields: [categoryId],references: [id]) //y aqui relacionamos el modelo category
+  orderItems OrderProducts[]
+
+}
+
+model Order{
+  id Int @id @default(autoincrement())
+  name String
+  total Float
+  date  DateTime @default(now())
+  status Boolean @default(false) // cada vez que la orden no este lista 
+  orderReadyAt DateTime? // opcional 
+  orderProducts OrderProducts[]
+}
+//pivote muchas ordenes con muchos productos 
+model OrderProducts {
+  id Int @id @default(autoincrement())
+  orderId Int
+  order Order @relation(fields: [orderId],references: [id])
+  productId Int
+  product Product @relation(fields: [productId],references: [id])
+  quantity Int
+}
